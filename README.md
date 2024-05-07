@@ -1,10 +1,4 @@
 # Final Project
-
-This is where you and your team will place design documents, notes, research, etc.
-
-**Use the changelog to demonstrate your active participation and progress to us, this is how you are graded**
-
 # Submission
 
-1. All your work!
-1. Updated changelog
+Heres the link to our website: https://66397c00a93f246c49cbe68a--storied-smakager-077af6.netlify.app/ 

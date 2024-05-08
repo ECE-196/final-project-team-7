@@ -32,6 +32,10 @@ async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Photo has been saved successfully.')
     return ConversationHandler.END
 
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text('Operation cancelled.')
+    return ConversationHandler.END
+
 #  Starting the bot
 if __name__ == '__main__':
     print('Starting bot...')

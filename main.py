@@ -78,7 +78,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def list_faces(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if recognized_faces:  # Check if any faces are registered
-        face_list = "\n".join(f"- {name}" for name in recognized_faces)
+        face_list = "\n".join(f"- {name}" for name in recognized_faces.keys())
         await update.message.reply_text(f"Recognized faces:\n{face_list}")
     else:
         await update.message.reply_text("No faces registered yet.")
@@ -110,6 +110,7 @@ if __name__ == '__main__':
 
     app.add_handler(CommandHandler('start', start_command))
     app.add_handler(CommandHandler('help', help_command)) 
+    app.add_handler(CommandHandler('list_faces', list_faces))
 
     
     app.run_polling()

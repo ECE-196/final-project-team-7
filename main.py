@@ -2,8 +2,14 @@ import os
 from json.tool import main
 from tkinter.tix import MAIN
 from typing import Final
+import certifi
+import urllib3
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ConversationHandler, ContextTypes 
+
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 
 
 TOKEN: Final = '6635383068:AAFJituA5_o8o7L_ypkBuc0YgQlggetRee8'
@@ -111,8 +117,5 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('start', start_command))
     app.add_handler(CommandHandler('help', help_command)) 
     app.add_handler(CommandHandler('list_faces', list_faces))
-
     
-    app.run_polling()
-    
-    app.run_polling()
+    app.run_polling()  

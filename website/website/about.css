@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Economica&family=Open+Sans&display=swap'); 
+
+body {
+    font-family: "Open Sans", sans-serif;
+    color: #333;
+    line-height: 1.6;
+    background-color: #f8f8f8; /* Slightly off-white background */
+    margin: 0;
+    padding: 0;
+  }
+  
+ header {
+    background: rgba(241, 241, 241, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 25px 12%;
+    text-align: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+  }
+  
+  header h1 {
+    font-size: 2.5rem;
+    color: #966F33;
+    margin-bottom: 10px;
+  }
+  
+  header a {
+    color: #5e5e5e;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  
+  header a:hover {
+    color: #966F33;
+  }
+  
+  /* Main Content Styling */
+  main {
+    max-width: 960px;
+    margin: 120px auto; /* Top margin for header space */
+    padding: 0 20px;
+    text-align: center;
+  }
+  
+  h2 {
+    color: #737373;
+    font-size: 1.8rem;
+    margin-top: 40px;
+    margin-bottom: 10px;
+  }
+  
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 25px; /* Adjust paragraph spacing */
+  }
+  
+  /* Image Styling */
+  img {
+    max-width: 300px;
+    height: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+  }
+  

@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Economica&family=Open+Sans&display=swap'); 
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Open Sans",sans-serif;
+  text-decoration: none;
+  list-style: none;
+}
+
+.header{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 35px 12%;
+  background: rgba(241,241,241);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+}
+
+.logo{
+  font-size: 25px;
+  color: #737373;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+span{
+  color: #966F33; /* Wooden brown */
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+}
+
+.navbar a{
+  font-size: 18px;
+  color: black;
+  font-weight: 500;
+  margin: 0 20px;
+  border-bottom: 3px solid transparent;
+  transition: 0.3s ease;
+  padding-bottom: 30px 12% 0;
+}
+.navbar a:hover,
+.navbar a.active{
+  color: #966F33; /* Wooden brown */
+  border-bottom: 3px solid #966F33; /* Wooden brown */
+}
+
+.home{
+  width: 100%;
+  min-height: 100vh;
+  background: rgb(241,241,241);
+  display: flex;
+  align-items: center;
+  gap: 7em;
+  padding: 30px 12% 0;
+}
+
+.home-content{
+  max-width: 800px;
+  margin-top: 125px;
+}
+
+.home-content h1{
+  font-family: "Economica", sans-serif;
+  font-size: 90px;
+  line-height: 1.2;
+  margin-top: -125px;
+}
+
+.home-content h2{
+  font-size: 50px;
+  line-height: 1.2;
+  color: #966F33;
+  padding-left: 30px;
+}
+
+.home-content h3{
+  font-size: 30px;
+  line-height: 1.2;
+  color: #966F33;
+  padding-left: 30px;
+
+}
+
+.home-content p{
+  font-size: 18px;
+  margin: 25px 0 30px;
+  padding-left: 30px;
+  padding-bottom: 10px;
+}
+
+.img-box img{
+  border-radius: 50%;
+  width: 550px;
+}
+
+::-webkit-scrollbar{
+  width: 7px;
+}
+
+::-webkit-scrollbar-thumb{
+  background-color: #966F33; /* Wooden brown */
+}

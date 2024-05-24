@@ -1,5 +1,4 @@
 .venv/
 env/
-facial-recognition-main/
 *.jpg
 Object_Detection_Files

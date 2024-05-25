@@ -15,7 +15,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Hello! We are here to help you to identify visitors at your doorstep.')
 
 # /add_face command
-NAME, PHOTO = range(2)
+NAME, VIDEO = range(2)
 
 async def add_face(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Please send me the name of the person.')
@@ -24,18 +24,18 @@ async def add_face(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text
     context.user_data['name'] = name
-    await update.message.reply_text(f'Got it! Please send me a photo of {name}.')
-    return PHOTO
+    await update.message.reply_text(f'Got it! Please send me a video of {name}.')
+    return VIDEO
 
-async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        photo_file = await update.message.photo[-1].get_file()
+        video_file = await update.message.video.get_file()
         name = context.user_data['name']
-        photo_path = f"{name}.jpg"
-        await photo_file.download_to_drive(photo_path)
+        video_path = f"{name}.mp4"
+        await video_file.download_to_drive(video_path)
 
         # Add to the dictionary:
-        recognized_faces[name] = photo_path  
+        recognized_faces[name] = video_path  
 
         await update.message.reply_text(f"Face of '{name}' added successfully!")
     except Exception as e:
@@ -55,9 +55,9 @@ async def remove_face(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def remove_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name_to_remove = update.message.text
     if name_to_remove in recognized_faces:
-        photo_path = f"{name_to_remove}.jpg"
-        if os.path.exists(photo_path):  # Check if the file exists
-            os.remove(photo_path)        # Delete the photo
+        video_path = f"{name_to_remove}.mp4"
+        if os.path.exists(video_path):  # Check if the file exists
+            os.remove(video_path)        # Delete the photo
             del recognized_faces[name_to_remove]
             await update.message.reply_text(f"Removed {name_to_remove} and their photo successfully.")
         else:
@@ -92,7 +92,7 @@ if __name__ == '__main__':
         entry_points=[CommandHandler('add_face', add_face)],
         states={
             NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, name)],
-            PHOTO: [MessageHandler(filters.PHOTO, photo)],
+            VIDEO: [MessageHandler(filters.VIDEO, video)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )

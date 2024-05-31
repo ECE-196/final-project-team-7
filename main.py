@@ -14,7 +14,7 @@ import time
 from imutils import paths
 import multiprocessing
 from queue import Empty
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 TOKEN = '6635383068:AAFJituA5_o8o7L_ypkBuc0YgQlggetRee8'
 BOT_USERNAME = '@facial_recognizer_bot'
@@ -23,7 +23,7 @@ flag = multiprocessing.Value('b', False)
 camera_process = None
 message_queue = multiprocessing.Queue()
 
-'''
+
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
  
@@ -61,7 +61,7 @@ def distance():
     distance = (TimeElapsed * 34300) / 2
  
     return distance
-'''
+
 
 # /start command
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -154,9 +154,9 @@ def camera_loop(flag, queue):
                 # will select first entry in the dictionary)
                 name = max(counts, key=counts.get)
                 #dist = distance()
+                #print(dist)
                 # If someone in your dataset is identified, print their name on the screen
                 if currentname != name:
-                    '''and dist < 12'''
                     currentname = name
                     # print(currentname)
                     message = f"It's {name} at the door."
@@ -206,7 +206,9 @@ async def open_cam(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def stop_cam(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global camera_process, flag
     flag.value = True
-    camera_process.join()
+    #camera_process.join()
+    while camera_process.is_alive():
+        time.sleep(0.1)
     await update.message.reply_text('Stopping camera...')
 
 async def check_queue(context: ContextTypes.DEFAULT_TYPE):
@@ -240,16 +242,27 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         frame_cnt = 0
         while success: # check success here might break your program
             success,image = vidcap.read() #success might be false and image might be None
+            
             #check success here
             if not success:
                 break
-
             # on every numFrameToSave 
             if (count % numFrameToSave ==0):  
-                frame_path = os.path.join(output_dir, "%s_%d.jpg" % (name, frame_cnt))
-                cv2.imwrite(frame_path, image)
+                frame_path = os.path.join(output_dir, "%s_%d" % (name, frame_cnt))
+                #write the regular img
+                cv2.imwrite(frame_path+".jpg", image)
+                og_image = cv2.imread(frame_path+".jpg")
+                #write 90 degrees clockwise
+                image = cv2.rotate(og_image, cv2.ROTATE_90_CLOCKWISE)
+                cv2.imwrite(frame_path + "_90.jpg", image)
+                #write 180 degrees 
+#                 image = cv2.rotate(og_image, cv2.ROTATE_180)
+#                 cv2.imwrite(frame_path + "_180.jpg", image)
+                #write 270 degrees
+                image = cv2.rotate(og_image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                cv2.imwrite(frame_path + "_270.jpg", image)
+                
                 frame_cnt += 1  
-
             if cv2.waitKey(10) == 27:                     
                 break
             count += 1
@@ -259,7 +272,7 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         ## MODEL TRAINING ## 
         
-        imagePaths = list(paths.list_images(f"dataset/{name}"))        
+        imagePaths = list(paths.list_images(f"dataset/{name}"))
         # initialize the list of known encodings and known names
         # knownEncodings = []
         # knownNames = []
@@ -284,17 +297,17 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # corresponding to each face in the input image
         boxes = face_recognition.face_locations(rgb,
             model="hog")
-
+        
         # compute the facial embedding for the face
         encodings = face_recognition.face_encodings(rgb, boxes)
-
+        
         # loop over the encodings
         for encoding in encodings:
             # add each encoding + name to our set of known names and
             # encodings
             knownEncodings.append(encoding)
             knownNames.append(name)
-
+        
         # dump the facial encodings + names to disk
         print("[INFO] serializing encodings...")
         '''

@@ -99,6 +99,7 @@ def camera_loop(flag, queue):
     currentname = "unknown"
     # Determine faces from encodings.pickle file model created from train_model.py
     encodingsP = "encodings.pickle"
+    last_message = None
 
     # load the known faces and embeddings along with OpenCV's Haar
     # cascade for face detection
@@ -123,6 +124,7 @@ def camera_loop(flag, queue):
         # compute the facial embeddings for each face bounding box
         encodings = face_recognition.face_encodings(frame, boxes)
         names = []
+        message = None
 
         # loop over the facial embeddings
         for encoding in encodings:
@@ -157,10 +159,16 @@ def camera_loop(flag, queue):
                     '''and dist < 12'''
                     currentname = name
                     # print(currentname)
-                    queue.put(f"It's {name} at the door.")
+                    message = f"It's {name} at the door."
+            else: 
+                message = "There's an unregistered face at the door."
 
             # update the list of names
             names.append(name)
+        
+        if message and message != last_message:
+            queue.put(message)
+            last_message = message
 
         # loop over the recognized faces
         for ((top, right, bottom, left), name) in zip(boxes, names):

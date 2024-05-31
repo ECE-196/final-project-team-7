@@ -15,7 +15,7 @@ import time
 from imutils import paths
 import multiprocessing
 from queue import Empty
-
+import RPi.GPIO as GPIO
 
 TOKEN: Final = '6635383068:AAFJituA5_o8o7L_ypkBuc0YgQlggetRee8'
 BOT_USERNAME: Final = '@facial_recognizer_bot'
@@ -23,6 +23,44 @@ BOT_USERNAME: Final = '@facial_recognizer_bot'
 flag = multiprocessing.Value('b', False)
 camera_process = None
 message_queue = multiprocessing.Queue()
+
+#GPIO Mode (BOARD / BCM)
+GPIO.setmode(GPIO.BCM)
+ 
+#set GPIO Pins
+GPIO_TRIGGER = 18
+GPIO_ECHO = 24
+ 
+#set GPIO direction (IN / OUT)
+GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
+GPIO.setup(GPIO_ECHO, GPIO.IN)
+ 
+def distance():
+    # set Trigger to HIGH
+    GPIO.output(GPIO_TRIGGER, True)
+ 
+    # set Trigger after 0.01ms to LOW
+    time.sleep(0.00001)
+    GPIO.output(GPIO_TRIGGER, False)
+ 
+    StartTime = time.time()
+    StopTime = time.time()
+ 
+    # save StartTime
+    while GPIO.input(GPIO_ECHO) == 0:
+        StartTime = time.time()
+ 
+    # save time of arrival
+    while GPIO.input(GPIO_ECHO) == 1:
+        StopTime = time.time()
+ 
+    # time difference between start and arrival
+    TimeElapsed = StopTime - StartTime
+    # multiply with the sonic speed (34300 cm/s)
+    # and divide by 2, because there and back
+    distance = (TimeElapsed * 34300) / 2
+ 
+    return distance
 
 
 # Function to generate the file path for a user's data based on their user ID
@@ -120,9 +158,9 @@ def camera_loop(flag, queue):
                 # of votes (note: in the event of an unlikely tie Python
                 # will select first entry in the dictionary)
                 name = max(counts, key=counts.get)
-
+                dist = distance()
                 # If someone in your dataset is identified, print their name on the screen
-                if currentname != name:
+                if currentname != name and dist < 120:
                     currentname = name
                     # print(currentname)
                     queue.put(f"It's {name} at the door.")

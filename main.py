@@ -2,7 +2,7 @@ import os
 import json
 from json.tool import main
 from tkinter.tix import MAIN
-from typing import Final
+#from typing import Final
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ConversationHandler, ContextTypes 
 import cv2
@@ -17,8 +17,8 @@ import multiprocessing
 from queue import Empty
 import RPi.GPIO as GPIO
 
-TOKEN: Final = '6635383068:AAFJituA5_o8o7L_ypkBuc0YgQlggetRee8'
-BOT_USERNAME: Final = '@facial_recognizer_bot'
+TOKEN = '6635383068:AAFJituA5_o8o7L_ypkBuc0YgQlggetRee8'
+BOT_USERNAME = '@facial_recognizer_bot'
 
 flag = multiprocessing.Value('b', False)
 camera_process = None

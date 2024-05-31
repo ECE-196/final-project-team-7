@@ -14,6 +14,7 @@ import imutils
 import time
 from imutils import paths
 import multiprocessing
+from queue import Empty
 
 
 TOKEN: Final = '6635383068:AAFJituA5_o8o7L_ypkBuc0YgQlggetRee8'
@@ -21,6 +22,8 @@ BOT_USERNAME: Final = '@facial_recognizer_bot'
 
 flag = multiprocessing.Value('b', False)
 camera_process = None
+message_queue = multiprocessing.Queue()
+
 
 # Function to generate the file path for a user's data based on their user ID
 def get_user_data_file(user_id):
@@ -54,14 +57,16 @@ async def name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     context.user_data['name'] = name
 
+    
     # Load user data
     user_data = load_user_data(user_id)
     context.user_data['recognized_faces'] = user_data
+    
 
     await update.message.reply_text(f'Got it! Please send me a video of {name}.')
     return VIDEO
 
-def camera_loop(flag):
+def camera_loop(flag, queue):
     # Initialize 'currentname' to trigger only when a new person is identified.
     currentname = "unknown"
     # Determine faces from encodings.pickle file model created from train_model.py
@@ -119,7 +124,8 @@ def camera_loop(flag):
                 # If someone in your dataset is identified, print their name on the screen
                 if currentname != name:
                     currentname = name
-                    print(currentname)
+                    # print(currentname)
+                    queue.put(f"It's {name} at the door.")
 
             # update the list of names
             names.append(name)
@@ -148,17 +154,30 @@ def camera_loop(flag):
     vs.stop()
 
 async def open_cam(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global camera_process, flag
+    global camera_process, flag, message_queue
     flag.value = False
-    await update.message.reply_text(f'Camera on. Send `/stop_cam` to stop.')
-    camera_process = multiprocessing.Process(target=camera_loop, args=(flag,))
+    camera_process = multiprocessing.Process(target=camera_loop, args=(flag, message_queue))
     camera_process.start()
+    await update.message.reply_text(f'Camera on. Send `/stop_cam` to stop.')
+
+    # Start a background task to check for messages in the queue
+    context.job_queue.run_repeating(check_queue, interval=1, first=0, data=update)
 
 async def stop_cam(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global camera_process, flag
     flag.value = True
     camera_process.join()
     await update.message.reply_text('Stopping camera...')
+
+async def check_queue(context: ContextTypes.DEFAULT_TYPE):
+    global message_queue
+    update = context.job.data
+    try:
+        while True:
+            message = message_queue.get_nowait()
+            await update.message.reply_text(message)
+    except Empty:
+        pass
 
 async def video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
@@ -235,11 +254,12 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # dump the facial encodings + names to disk
         print("[INFO] serializing encodings...")
         data = {"encodings": knownEncodings, "names": knownNames}
-        f = open("encodings.pickle", "wb")
+        f = open(f"encodings.pickle.{name}", "wb")
         f.write(pickle.dumps(data))
         f.close()
 
         ### END OF MODEL TRAINING ###
+        
         # Load user data
         user_data = context.user_data.get('recognized_faces', {})
         if name in user_data:
@@ -249,6 +269,7 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Save user data
         save_user_data(user_id, user_data)
+        
 
         await update.message.reply_text(f"Face of '{name}' added successfully!")
     except Exception as e:
@@ -258,6 +279,7 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Operation cancelled.')
     return ConversationHandler.END
+
 
 async def remove_face(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Please send me the name of the person to remove.')
@@ -280,6 +302,7 @@ async def remove_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"{name_to_remove} is not a recognized face.")
     return ConversationHandler.END
     
+    
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = """
     Here are the available commands:
@@ -292,6 +315,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     await update.message.reply_text(help_text)
 
+
 async def list_faces(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     user_data = load_user_data(user_id)
@@ -300,6 +324,7 @@ async def list_faces(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Recognized faces:\n{face_list}")
     else:
         await update.message.reply_text("No faces registered yet.")
+
 
 #  Starting the bot
 if __name__ == '__main__':
@@ -317,6 +342,7 @@ if __name__ == '__main__':
         fallbacks=[CommandHandler('cancel', cancel)],
     )
 
+    
     remove_face_handler = ConversationHandler(
         entry_points=[CommandHandler('remove_face', remove_face)],
         states={
@@ -324,16 +350,17 @@ if __name__ == '__main__':
         },
         fallbacks=[]
     )
+    
 
     app.add_handler(add_face_handler)
-    app.add_handler(remove_face_handler)
+    # app.add_handler(remove_face_handler)
     app.add_handler(CommandHandler('open_cam', open_cam))
     app.add_handler(CommandHandler('stop_cam', stop_cam))
 
 
     app.add_handler(CommandHandler('start', start_command))
     app.add_handler(CommandHandler('help', help_command)) 
-    app.add_handler(CommandHandler('list_faces', list_faces))
+    # app.add_handler(CommandHandler('list_faces', list_faces))
 
     app.run_polling()
     

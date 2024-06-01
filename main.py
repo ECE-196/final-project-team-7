@@ -15,6 +15,8 @@ from imutils import paths
 import multiprocessing
 from queue import Empty
 import RPi.GPIO as GPIO
+import asyncio
+#import skvideo.io
 
 TOKEN = '6635383068:AAFJituA5_o8o7L_ypkBuc0YgQlggetRee8'
 BOT_USERNAME = '@facial_recognizer_bot'
@@ -166,7 +168,12 @@ def camera_loop(flag, queue):
             # update the list of names
             names.append(name)
         
-        if message and message != last_message:
+        dist = distance()
+        print(dist)
+        print(message)
+        print(last_message)
+        if message and message != last_message and dist < 15:
+            print("message added")
             queue.put(message)
             last_message = message
 
@@ -208,7 +215,7 @@ async def stop_cam(update: Update, context: ContextTypes.DEFAULT_TYPE):
     flag.value = True
     #camera_process.join()
     while camera_process.is_alive():
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)
     await update.message.reply_text('Stopping camera...')
 
 async def check_queue(context: ContextTypes.DEFAULT_TYPE):
@@ -252,15 +259,6 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 #write the regular img
                 cv2.imwrite(frame_path+".jpg", image)
                 og_image = cv2.imread(frame_path+".jpg")
-                #write 90 degrees clockwise
-                image = cv2.rotate(og_image, cv2.ROTATE_90_CLOCKWISE)
-                cv2.imwrite(frame_path + "_90.jpg", image)
-                #write 180 degrees 
-#                 image = cv2.rotate(og_image, cv2.ROTATE_180)
-#                 cv2.imwrite(frame_path + "_180.jpg", image)
-                #write 270 degrees
-                image = cv2.rotate(og_image, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                cv2.imwrite(frame_path + "_270.jpg", image)
                 
                 frame_cnt += 1  
             if cv2.waitKey(10) == 27:                     

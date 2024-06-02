@@ -101,7 +101,7 @@ def camera_loop(flag, queue):
     currentname = "unknown"
     # Determine faces from encodings.pickle file model created from train_model.py
     encodingsP = "encodings.pickle"
-    last_message = None
+    
 
     # load the known faces and embeddings along with OpenCV's Haar
     # cascade for face detection
@@ -115,10 +115,11 @@ def camera_loop(flag, queue):
 
     # start the FPS counter
     fps = FPS().start()
-    
+    message = None
     # loop over frames from the video file stream
     while not flag.value:
         # grab the frame from the threaded video stream and resize it
+        last_message = None
         frame = vs.read()
         frame = imutils.resize(frame, width=500)
         # Detect the face boxes
@@ -126,7 +127,7 @@ def camera_loop(flag, queue):
         # compute the facial embeddings for each face bounding box
         encodings = face_recognition.face_encodings(frame, boxes)
         names = []
-        message = None
+        
 
         # loop over the facial embeddings
         for encoding in encodings:
@@ -162,6 +163,8 @@ def camera_loop(flag, queue):
                     currentname = name
                     # print(currentname)
                     message = f"It's {name} at the door."
+#                 else:
+#                     message = "There's an unregistered face at the door."
             else: 
                 message = "There's an unregistered face at the door."
 
@@ -169,10 +172,11 @@ def camera_loop(flag, queue):
             names.append(name)
         
         dist = distance()
-        #print("distance: " + dist + "cm")
-        #print(last_message)
+        #print(dist)
+        print(message)
+        print(last_message)
         if message and message != last_message and dist < 15:
-            print(message)
+            print("message added")
             queue.put(message)
             last_message = message
 
@@ -423,4 +427,3 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('list_faces', list_faces))
 
     app.run_polling()
-    

@@ -169,11 +169,10 @@ def camera_loop(flag, queue):
             names.append(name)
         
         dist = distance()
-        print(dist)
-        print(message)
-        print(last_message)
+        #print("distance: " + dist + "cm")
+        #print(last_message)
         if message and message != last_message and dist < 15:
-            print("message added")
+            print(message)
             queue.put(message)
             last_message = message
 

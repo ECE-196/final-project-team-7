@@ -138,6 +138,15 @@ span{
   font-size: 18px; ;  
 }
 
+.home-content img {
+  max-width: 300px;
+  height: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
+  margin-left: 30px;
+}
+
+
 .img-box img{
   border-radius: 50%;
   width: 550px;

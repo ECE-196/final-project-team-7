@@ -14,7 +14,7 @@ import time
 from imutils import paths
 import multiprocessing
 from queue import Empty
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 import asyncio
 #import skvideo.io
 
@@ -26,43 +26,43 @@ camera_process = None
 message_queue = multiprocessing.Queue()
 
 
-#GPIO Mode (BOARD / BCM)
-GPIO.setmode(GPIO.BCM)
+# #GPIO Mode (BOARD / BCM)
+# GPIO.setmode(GPIO.BCM)
  
-#set GPIO Pins
-GPIO_TRIGGER = 18
-GPIO_ECHO = 24
+# #set GPIO Pins
+# GPIO_TRIGGER = 18
+# GPIO_ECHO = 24
  
-#set GPIO direction (IN / OUT)
-GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
-GPIO.setup(GPIO_ECHO, GPIO.IN)
+# #set GPIO direction (IN / OUT)
+# GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
+# GPIO.setup(GPIO_ECHO, GPIO.IN)
  
-def distance():
-    # set Trigger to HIGH
-    GPIO.output(GPIO_TRIGGER, True)
+# def distance():
+#     # set Trigger to HIGH
+#     GPIO.output(GPIO_TRIGGER, True)
  
-    # set Trigger after 0.01ms to LOW
-    time.sleep(0.00001)
-    GPIO.output(GPIO_TRIGGER, False)
+#     # set Trigger after 0.01ms to LOW
+#     time.sleep(0.00001)
+#     GPIO.output(GPIO_TRIGGER, False)
  
-    StartTime = time.time()
-    StopTime = time.time()
+#     StartTime = time.time()
+#     StopTime = time.time()
  
-    # save StartTime
-    while GPIO.input(GPIO_ECHO) == 0:
-        StartTime = time.time()
+#     # save StartTime
+#     while GPIO.input(GPIO_ECHO) == 0:
+#         StartTime = time.time()
  
-    # save time of arrival
-    while GPIO.input(GPIO_ECHO) == 1:
-        StopTime = time.time()
+#     # save time of arrival
+#     while GPIO.input(GPIO_ECHO) == 1:
+#         StopTime = time.time()
  
-    # time difference between start and arrival
-    TimeElapsed = StopTime - StartTime
-    # multiply with the sonic speed (34300 cm/s)
-    # and divide by 2, because there and back
-    distance = (TimeElapsed * 34300) / 2
+#     # time difference between start and arrival
+#     TimeElapsed = StopTime - StartTime
+#     # multiply with the sonic speed (34300 cm/s)
+#     # and divide by 2, because there and back
+#     distance = (TimeElapsed * 34300) / 2
  
-    return distance
+#     return distance
 
 
 # /start command
@@ -171,11 +171,11 @@ def camera_loop(flag, queue):
             # update the list of names
             names.append(name)
         
-        dist = distance()
+        # dist = distance()
         #print(dist)
         print(message)
         print(last_message)
-        if message and message != last_message and dist < 15:
+        if message and message != last_message:
             print("message added")
             queue.put(message)
             last_message = message

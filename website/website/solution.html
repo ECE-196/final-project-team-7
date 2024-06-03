@@ -18,6 +18,29 @@
           <a href="resources.html">Resources</a>
         </nav>
       </header>
+      <style> /* Embedded CSS within a <style> tag */
+
+   
+        main {
+          display: flex; /* Use flexbox for layout */
+        }
+        
+        .home-content {
+          flex: 2; /* Give the content 2/3 of the width */
+          margin-right: 30px; /* Add some space between content and flowchart */
+        }
+        
+        .flowchart-container {
+          flex: 1; /* Give the flowchart 1/3 of the width */
+        }
+        
+        .flowchart-container img {
+          margin-top: 200px;
+          max-width: 100%; /* Make the flowchart responsive */
+          height: auto;  
+          display: block;  /* Prevent image from overflowing its container */
+        }
+          </style>
 
       <main>
         <div class="home-content"> <h2>The Problem</h2>
@@ -26,7 +49,7 @@
                 family, or regular visitors at their home. This inability can severely disrupt their social interactions and compromise their safety.
             </p>
 
-            <h2>Our Testable Hypothesis</h2>
+            <h2>Testable Hypothesis</h2>
             <p>
                 Users who experience amnesia who use our facial recognition door camera experience a higher level of confidence when 
                 answering the door as opposed to without one.
@@ -37,6 +60,19 @@
                 Noting the ability of our algorithm in combination with the camera module to recognize and classify people.
             </p>
 
+            <h2>Our Solution</h2>
+            <p> We want to integrate a face recognition component to a ring doorbell which will help people with amnesia identify their visitors.</p>
+            <p>This is how our facial-recognition doorcamera will work:</p>
+   
+            <ul><ul>
+                <li>First we take a short 4-5 second video of the subject's face and send it to our telegram bot</li>      
+                <li>User is asked to name the person in the video to train the neural network</li>
+                <li>When the camera of the doorbell is turned on it checks if the subject is close enough</li>
+                <li>If the subject is close enough and is recognised, it sends a message on telegram.</li>
+            </ul></ul>
+        </div> 
+        <div class="flowchart-container"> 
+            <img src="images/flowchart.png" alt="Flowchart of Facial Recognition Doorbell">
         </div> 
     </main>
 </body>

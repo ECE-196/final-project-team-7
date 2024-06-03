@@ -68,6 +68,8 @@ span{
 .home-content{
   max-width: 800px;
   margin-top: 125px;
+  flex: 2; /* Give the content 2/3 of the width */
+  margin-right: 30px; /* Add some space between content and flowchart */
 }
 
 .home-content h1{
@@ -159,3 +161,4 @@ span{
 ::-webkit-scrollbar-thumb{
   background-color: #966F33; /* Wooden brown */
 }
+

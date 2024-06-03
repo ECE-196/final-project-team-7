@@ -99,6 +99,45 @@ span{
   padding-bottom: 10px;
 }
 
+.home-content a { /* Target links within .home-content */
+  font-size: 21px;  /* Increase font size */
+  color: #666;      /* A medium-gray color */
+  margin: 25px 0 30px;
+  padding-left: 30px;
+  /* padding-top: -20px;  */
+  text-decoration: none; /* Remove default underline */
+  display: block;     /* Make each link fill the width */
+}
+
+.home-content ul { /* Target all lists within .home-content */
+  list-style-type: none;     /* Remove default bullets */
+  padding-left: 0px; 
+  margin-top: 0;         /* Remove default list indentation */
+}
+
+.home-content ul li::before { /* Add custom bullet points */
+  content: "\2022";          /* This is the bullet character */
+  color: #666;             /* Same gray as the link text */
+  display: inline-block;   /* Position the bullet correctly */
+  width: 1em;             /* Width of the bullet (adjust as needed) */
+  margin-left: -1em;       /* Align bullet with list item */
+}
+
+.home-content ul ul {   /* Target nested lists (for descriptions) */
+  margin-left: 2em; 
+  padding-bottom: 15px    
+}
+
+.home-content ul li { /* Target all list items */
+  margin-bottom: 5px;
+  padding-top: -15px;
+  margin-top: 0px;
+}
+
+.home-content ul ul li {  /* Style text of nested list items */
+  font-size: 18px; ;  
+}
+
 .img-box img{
   border-radius: 50%;
   width: 550px;

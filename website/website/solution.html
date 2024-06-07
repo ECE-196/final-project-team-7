@@ -92,13 +92,68 @@
                 </div>
             </div>
 
-            <h3>Software</h3>
-            <h4>Telegram Bot</h4>
-            <p>The telegram bot was set up on python using the token of the Facial Recognition Bot that we created on the Telegram app and we added the following commands</p>
-            <h5>Start Command</h5> 
-            <p>Starts the bot</p>
+            <h3>Ultrasonic Range Sensor Setup</h3>
+            <a href="https://thepihut.com/blogs/raspberry-pi-tutorials/hc-sr04-ultrasonic-range-sensor-on-the-raspberry-pi"> Help for setup</a>
+            <img src="images/circuit.png">
+            <p>1. Plugged four of our male to female jumper wires into the pins on the HC-SR04 </p>
+            <p>2. Plugged Vcc into the positive rail of your breadboard, and plug GND into your negative rail.</p>
+            <p>3. Plugged GPIO 5V [Pin 2] into the positive rail, and GPIO GND [Pin 6] into the negative rail. </p>
+            <p>4. Plugged TRIG into a blank rail, and plugged that rail into GPIO 23 [Pin 16].</p>
+            <p>5. Plugged ECHO into a blank rail, linked another blank rail using R1 (1kΩ resistor)</p>
+            <p>6. Linked our R1 rail with the GND rail using R2 (2kΩ resistor). Leave a space between the two resistors.</p>
+            <p>7. Added GPIO 24 [Pin 18] to the rail with your R1 (1kΩ resistor).</p>
+            <img src="images/prox_setup.png">
+
+            <p>This is how we connected it to the camera and implemented it with our telegram bot:</p>
             <pre class="code-box">
               <code>
+      #GPIO Mode (BOARD / BCM)
+      GPIO.setmode(GPIO.BCM)
+        
+      #set GPIO Pins
+      GPIO_TRIGGER = 18
+      GPIO_ECHO = 24
+        
+      #set GPIO direction (IN / OUT)
+      GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
+      GPIO.setup(GPIO_ECHO, GPIO.IN)
+        
+      def distance():
+          # set Trigger to HIGH
+          GPIO.output(GPIO_TRIGGER, True)
+        
+          # set Trigger after 0.01ms to LOW
+          time.sleep(0.00001)
+          GPIO.output(GPIO_TRIGGER, False)
+        
+          StartTime = time.time()
+          StopTime = time.time()
+        
+          # save StartTime
+          while GPIO.input(GPIO_ECHO) == 0:
+              StartTime = time.time()
+        
+          # save time of arrival
+          while GPIO.input(GPIO_ECHO) == 1:
+              StopTime = time.time()
+        
+          # time difference between start and arrival
+          TimeElapsed = StopTime - StartTime
+          # multiply with the sonic speed (34300 cm/s)
+          # and divide by 2, because there and back
+          distance = (TimeElapsed * 34300) / 2
+        
+          return distance
+              </code>
+            </pre>
+
+    <h3>Software</h3>
+    <h4>Telegram Bot</h4>
+    <p>The telegram bot was set up on python using the token of the Facial Recognition Bot that we created on the Telegram app and we added the following commands</p>
+    <h5>Start Command</h5> 
+    <p>Starts the bot</p>
+    <pre class="code-box">
+      <code>
       async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
           await update.message.reply_text('Hello! We are here to help you to identify visitors at your doorstep.')    
               </code>

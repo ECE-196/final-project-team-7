@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Economica&family=Open+Sans&display=swap'); 
+
+main {
+    display: flex;
+    padding: 0 10px;
+    /* max-width: 960px; */
+    margin: 120px auto;
+  }
+  
+  /* Content Area */
+  .home-content {
+    flex: 2;
+  }
+  
+  .home-content ul li {
+    margin-left: 65px;
+  }
+  
+  .home-content a {
+    margin-left: 65px;
+  }
+  
+  .home-content img {
+    margin-left: 5%;
+  }
+  
+  /* Flowchart Container */
+  .flowchart-container {
+    flex: 1;
+  }
+  
+  .flowchart-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-top: 200px; /* Adjust this as needed */
+  }
+  
+  /* Image Styling (General) */
+  img {
+    max-width: 300px;
+    height: auto;
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+    margin-top: 10px;
+    display: block;
+    margin: 0 auto;
+  }
+  
+  /* Hardware Grid */
+  .hardware-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 800px; /* Adjust the max-width as needed */
+    margin: 0 auto; /* Center the grid horizontally */
+  }
+  
+  .hardware-item {
+    text-align: center;
+  }
+  
+  .hardware-item img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+  }
+
+  .code-box {
+    background-color: #333;
+    border-radius: 10px;
+    overflow-x: auto;
+    margin-left: 20px;
+    padding-top: -30px;
+  }
+  
+  .code-box code {
+    font-family: monospace;
+    font-size: 14px;
+    color: #fff;
+  }

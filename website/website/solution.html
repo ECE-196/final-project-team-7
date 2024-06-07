@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Problem and Solution</title>
     <link rel="stylesheet" href="styles.css" /> 
+    <link rel="stylesheet" href="solutions.css" />
 </head>
 <body>
     <header class="header">
@@ -18,11 +19,10 @@
           <a href="resources.html">Resources</a>
         </nav>
       </header>
-      <style> /* Embedded CSS within a <style> tag */
-
-   
+      <!-- <style> /* Embedded CSS within a <style> tag */
         main {
-          display: flex; /* Use flexbox for layout */
+          display: flex;
+          padding: 0 10px;   /* Use flexbox for layout */
         }
         
         .home-content {
@@ -40,7 +40,7 @@
           height: auto;  
           display: block;  /* Prevent image from overflowing its container */
         }
-          </style>
+          </style> -->
 
       <main>
         <div class="home-content"> <h2>The Problem</h2>
@@ -70,6 +70,282 @@
                 <li>When the camera of the doorbell is turned on it checks if the subject is close enough</li>
                 <li>If the subject is close enough and is recognised, it sends a message on telegram.</li>
             </ul></ul>
+
+            <h2>Components</h2>
+            <h3>Hardware</h3>
+            <div class="hardware-grid">
+                <div class="hardware-item">
+                    <h4>RaspberryPi- microprocessor</h4>
+                    <img src="images/rasppi.png" alt="">
+                </div>
+                <div class="hardware-item">
+                    <h4>Camera Module</h4>
+                    <img src="images/cam_module.png" alt="">
+                </div>
+                <div class="hardware-item">
+                    <h4>Proximity Center</h4>
+                    <img src="images/prox.png" alt="">
+                </div>
+                <div class="hardware-item">
+                    <h4>Enclosure</h4>
+                    <img src="images/encl.png" alt="">
+                </div>
+            </div>
+
+            <h3>Software</h3>
+            <h4>Telegram Bot</h4>
+            <p>The telegram bot was set up on python using the token of the Facial Recognition Bot that we created on the Telegram app and we added the following commands</p>
+            <h5>Start Command</h5> 
+            <p>Starts the bot</p>
+            <pre class="code-box">
+              <code>
+      async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+          await update.message.reply_text('Hello! We are here to help you to identify visitors at your doorstep.')    
+              </code>
+            </pre>
+            <h5>Open Cam command</h5> 
+            <p>Opens the camera. In order to send a message to the user to notify them who is at the door, we implemented a job queue, which periodically checks in the background if there's any message that needs to be sent back to the user</p>
+            <pre class="code-box">
+              <code>
+    async def open_cam(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      global camera_process, flag, message_queue
+      flag.value = False
+      camera_process = multiprocessing.Process(target=camera_loop, args=(flag, message_queue))
+      camera_process.start()
+      await update.message.reply_text(f'Camera on. Send `/stop_cam` to stop.')
+  
+      # Start a background task to check for messages in the queue
+      context.job_queue.run_repeating(check_queue, interval=1, first=0, data=update)
+              </code>
+            </pre>
+            <h5>Stop Cam command</h5>
+            <p>closes the camera</p>
+            <pre class="code-box">
+              <code>
+    async def stop_cam(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      global camera_process, flag
+      flag.value = True
+      #camera_process.join()
+      while camera_process.is_alive():
+          await asyncio.sleep(0.1)
+      await update.message.reply_text('Stopping camera...')
+              </code>
+            </pre>
+            <h5>Add Face command</h5>
+            <p>Prompts the user to send a video of a face that they want to add into the system, which will then be broken down into about 10 images and start model training.</p>
+            <pre class="code-box">
+              <code>
+    async def add_face(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      await update.message.reply_text('Please send me the name of the person.')
+      return NAME
+    
+    async def video(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      try:
+          video_file = await update.message.video.get_file()
+          name = context.user_data['name']
+          user_id = update.message.from_user.id
+          video_path = f"{user_id}_{name}.mp4"
+          await video_file.download_to_drive(video_path)
+  
+          #make directory for images
+          output_dir = os.path.join('dataset', name)
+          os.makedirs(output_dir, exist_ok=True)
+          
+          vidcap = cv2.VideoCapture(video_path)
+          success,image = vidcap.read()
+          count = 0       
+  
+          # number of frames to skip
+          numFrameToSave = 12
+          frame_cnt = 0
+          while success: # check success here might break your program
+              success,image = vidcap.read() #success might be false and image might be None
+              
+              #check success here
+              if not success:
+                  break
+              # on every numFrameToSave 
+              if (count % numFrameToSave ==0):  
+                  frame_path = os.path.join(output_dir, "%s_%d" % (name, frame_cnt))
+                  #write the regular img
+                  cv2.imwrite(frame_path+".jpg", image)
+                  og_image = cv2.imread(frame_path+".jpg")
+                  
+                  frame_cnt += 1  
+              if cv2.waitKey(10) == 27:                     
+                  break
+              count += 1
+          # Add to the dictionary:
+          # recognized_faces[name] = video_path  
+              </code>
+            </pre>
+            <h5>Remove Face command</h5>
+              <p>Removes a face in the system. It will remove their image folder in the dataset, as well as their face encodings in the pickle file.</p>
+              <pre class="code-box">
+                <code>
+    async def remove_face(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      await update.message.reply_text('Please send me the name of the person to remove.')
+      return REMOVE_NAME
+    async def remove_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      name = update.message.text
+      user_id = update.message.from_user.id
+  
+      try:
+          # Load existing encodings and names
+          encodings_path = 'encodings.pickle'
+          knownEncodings, knownNames = load_encodings(encodings_path)
+  
+          # Find indices of the entries to be removed
+          indices_to_remove = [i for i, known_name in enumerate(knownNames) if known_name == name]
+  
+          # Remove the entries
+          knownEncodings = [encoding for i, encoding in enumerate(knownEncodings) if i not in indices_to_remove]
+          knownNames = [known_name for i, known_name in enumerate(knownNames) if i not in indices_to_remove]
+  
+          # Save the updated encodings and names back to the file
+          save_encodings(encodings_path, knownEncodings, knownNames)
+  
+          # Remove the directory containing the images
+          dataset_dir = os.path.join('dataset', name)
+          if os.path.exists(dataset_dir):
+              import shutil
+              shutil.rmtree(dataset_dir)
+  
+          await update.message.reply_text(f"Face of '{name}' removed successfully!")
+      except Exception as e:
+          await update.message.reply_text(f"Error removing face: {e}")
+      return ConversationHandler.END
+            </code>
+            </pre>  
+                <h5>List Faces command</h5>
+                <p>List all the names of the encoded faces from the pickle file
+                </p>
+                <pre class="code-box">
+                  <code>
+    async def list_faces(update: Update, context: ContextTypes.DEFAULT_TYPE):                                                    
+      encodings_path = 'encodings.pickle'
+      knownEncodings, knownNames = load_encodings(encodings_path)
+      if knownNames:  # Check if any faces are registered
+          face_list = "\n".join(f"- {name}" for name in set(knownNames))
+          await update.message.reply_text(f"Recognized faces:\n{face_list}")
+      else:
+          await update.message.reply_text("No faces registered yet.")
+                </code>
+              </pre> 
+              
+            <h5>Help command</h5>
+              <p>Provides a list of all commands</p>
+              <pre class="code-box">
+                <code>                  
+    async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      help_text = """
+      Here are the available commands:
+      /add_face - Register a new face.
+      /remove_face - Remove a registered face.
+      /list_faces - View all registered faces.
+      /open_cam - open the camera.
+      /stop_cam - stop the camera.
+      /help - Show this help message.
+      """
+      await update.message.reply_text(help_text)
+                </code>
+              </pre>
+              <h5>Model Training</h5>
+              <p>Open source: model training</p>
+              <pre class="code-box">
+                <code>                  
+    imagePaths = list(paths.list_images(f"dataset/{name}"))
+    # initialize the list of known encodings and known names
+    # knownEncodings = []
+    # knownNames = []
+
+    # Load existing encodings
+    encodings_path = "encodings.pickle"
+    knownEncodings, knownNames = load_encodings(encodings_path)
+
+    # loop over the image paths
+    for (i, imagePath) in enumerate(imagePaths):
+    # extract the person name from the image path
+        print("[INFO] processing image {}/{}".format(i + 1,
+        len(imagePaths)))
+    name = imagePath.split(os.path.sep)[-2]
+
+    # load the input image and convert it from RGB (OpenCV ordering)
+    # to dlib ordering (RGB)
+    image = cv2.imread(imagePath)
+    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # detect the (x, y)-coordinates of the bounding boxes
+    # corresponding to each face in the input image
+    boxes = face_recognition.face_locations(rgb,
+        model="hog")
+    
+    # compute the facial embedding for the face
+    encodings = face_recognition.face_encodings(rgb, boxes)
+    
+    # loop over the encodings
+    for encoding in encodings:
+        # add each encoding + name to our set of known names and
+        # encodings
+        knownEncodings.append(encoding)
+        knownNames.append(name)
+    
+    # dump the facial encodings + names to disk
+    print("[INFO] serializing encodings...")
+    '''
+    data = {"encodings": knownEncodings, "names": knownNames}
+    f = open(f"encodings.pickle.{name}", "wb")
+    f.write(pickle.dumps(data))
+    f.close()
+    '''
+    save_encodings(encodings_path, knownEncodings, knownNames)
+                </code>
+              </pre>
+              <h5>Main</h5>
+              <p>Starts the bot and has all command calls</p>
+              <pre class="code-box">
+                <code>                  
+    if __name__ == '__main__':
+      print('Starting bot...')
+      app = Application.builder().token(TOKEN).build()
+
+      
+
+      add_face_handler = ConversationHandler(
+          entry_points=[CommandHandler('add_face', add_face)],
+          states={
+              NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, name)],
+              VIDEO: [MessageHandler(filters.VIDEO, video)],
+          },
+          fallbacks=[CommandHandler('cancel', cancel)],
+      )
+
+
+      remove_face_handler = ConversationHandler(
+          entry_points=[CommandHandler('remove_face', remove_face)],
+          states={
+              REMOVE_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, remove_name)]
+          },
+          fallbacks=[]
+      )
+      
+      app.add_handler(add_face_handler)
+      app.add_handler(remove_face_handler)
+      app.add_handler(CommandHandler('open_cam', open_cam))
+      app.add_handler(CommandHandler('stop_cam', stop_cam))
+
+
+      app.add_handler(CommandHandler('start', start_command))
+      app.add_handler(CommandHandler('help', help_command)) 
+      app.add_handler(CommandHandler('list_faces', list_faces))
+
+      app.run_polling()
+                </code>
+              </pre>
+        
+              <h4>Website</h4>
+              <p> We used HTML and CSS to design our website</p>
+          
         </div> 
         <div class="flowchart-container"> 
             <img src="images/flowchart.png" alt="Flowchart of Facial Recognition Doorbell">
@@ -77,3 +353,4 @@
     </main>
 </body>
 </html>
+

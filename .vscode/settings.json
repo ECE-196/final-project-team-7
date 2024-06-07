@@ -1,13 +1,12 @@
 {
     "python.languageServer": "Pylance",
     "python.analysis.diagnosticSeverityOverrides": {
-        "reportMissingModuleSource": "none",
-        "reportShadowedImports": "none"
+        "reportMissingModuleSource": "none"
     },
     "python.analysis.extraPaths": [
         "",
-        "/Users/qianyunwang/.vscode/extensions/joedevivo.vscode-circuitpython-0.2.0-darwin-x64/stubs",
-        "/Users/qianyunwang/Library/Application Support/Code/User/globalStorage/joedevivo.vscode-circuitpython/bundle/20240529/adafruit-circuitpython-bundle-py-20240529/lib",
+        "/Users/yukthadeesan/.vscode/extensions/joedevivo.vscode-circuitpython-0.1.17-darwin-arm64/stubs",
+        "/Users/yukthadeesan/Library/Application Support/Code/User/globalStorage/joedevivo.vscode-circuitpython/bundle/20240604/adafruit-circuitpython-bundle-py-20240604/lib",
         "/Users/yukthadeesan/.vscode/extensions/joedevivo.vscode-circuitpython-0.1.17-darwin-arm64/stubs",
         "/Users/yukthadeesan/Library/Application Support/Code/User/globalStorage/joedevivo.vscode-circuitpython/bundle/20240507/adafruit-circuitpython-bundle-py-20240507/lib"
     ],
